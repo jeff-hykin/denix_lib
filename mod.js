@@ -1,4 +1,4 @@
-import { createRuntime } from "https://raw.esm.sh/gh/jeff-hykin/denix@1f73d879/main/runtime.js"
+import { createRuntime } from "https://raw.esm.sh/gh/jeff-hykin/denix@e818a96f/main/runtime.js"
 import libFile from "./lib/default.js"
 
 // The translated lib/default.nix: a function waiting for the denix runtime it
