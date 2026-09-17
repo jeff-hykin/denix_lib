@@ -44,66 +44,77 @@ let
 
   lib = makeExtensible' (
     self:
+    let
+      callLibs = file: import file { lib = self; };
+    in
     {
 
       # often used, or depending on very little
-      trivial = import ./trivial.nix { lib = self; };
-      fixedPoints = import ./fixed-points.nix { lib = self; };
+      trivial = callLibs ./trivial.nix;
+      fixedPoints = callLibs ./fixed-points.nix;
 
       # datatypes
-      attrsets = import ./attrsets.nix { lib = self; };
-      lists = import ./lists.nix { lib = self; };
-      strings = import ./strings.nix { lib = self; };
-      stringsWithDeps = import ./strings-with-deps.nix { lib = self; };
+      attrsets = callLibs ./attrsets.nix;
+      lists = callLibs ./lists.nix;
+      strings = callLibs ./strings.nix;
+      stringsWithDeps = callLibs ./strings-with-deps.nix;
 
       # packaging
-      customisation = import ./customisation.nix { lib = self; };
-      derivations = import ./derivations.nix { lib = self; };
+      customisation = callLibs ./customisation.nix;
+      derivations = callLibs ./derivations.nix;
       maintainers = import ../maintainers/maintainer-list.nix;
-      teams = import ../maintainers/computed-team-list.nix { lib = self; };
-      meta = import ./meta.nix { lib = self; };
-      versions = import ./versions.nix { lib = self; };
+      teams = callLibs ../maintainers/computed-team-list.nix;
+      meta = callLibs ./meta.nix;
+      versions = callLibs ./versions.nix;
 
       # module system
-      modules = import ./modules.nix { lib = self; };
-      options = import ./options.nix { lib = self; };
-      types = import ./types.nix { lib = self; };
+      modules = callLibs ./modules.nix;
+      options = callLibs ./options.nix;
+      types = callLibs ./types.nix;
 
       # constants
-      licenses = import ./licenses { lib = self; };
-      sourceTypes = import ./source-types.nix { lib = self; };
-      systems = import ./systems { lib = self; };
+      licenses = callLibs ./licenses;
+      sourceTypes = callLibs ./source-types.nix;
+      systems = callLibs ./systems;
 
       # serialization
-      cli = import ./cli.nix { lib = self; };
-      gvariant = import ./gvariant.nix { lib = self; };
-      generators = import ./generators.nix { lib = self; };
+      cli = callLibs ./cli.nix;
+      gvariant = callLibs ./gvariant.nix;
+      generators = callLibs ./generators.nix;
 
       # misc
-      asserts = import ./asserts.nix { lib = self; };
-      debug = import ./debug.nix { lib = self; };
-      misc = import ./deprecated/misc.nix { lib = self; };
+      asserts = callLibs ./asserts.nix;
+      debug = callLibs ./debug.nix;
+      misc = callLibs ./deprecated/misc.nix;
 
       # domain-specific
-      fetchers = import ./fetchers.nix { lib = self; };
+      fetchers = callLibs ./fetchers.nix;
+      services = callLibs ./services/lib.nix;
+      importService = self.modules.importApply ./services/service.nix;
+
+      # Modules that are not specific to a module class
+      genericModules = {
+        meta-maintainers = ./modules/generic/meta-maintainers.nix;
+        assertions = ./modules/generic/assertions.nix;
+      };
 
       # Eval-time filesystem handling
-      path = import ./path { lib = self; };
-      filesystem = import ./filesystem.nix { lib = self; };
-      fileset = import ./fileset { lib = self; };
-      sources = import ./sources.nix { lib = self; };
+      path = callLibs ./path;
+      filesystem = callLibs ./filesystem.nix;
+      fileset = callLibs ./fileset;
+      sources = callLibs ./sources.nix;
 
       # back-compat aliases
       platforms = self.systems.doubles;
 
       # linux kernel configuration
-      kernel = import ./kernel.nix { lib = self; };
+      kernel = callLibs ./kernel.nix;
 
       # network
-      network = import ./network { lib = self; };
+      network = callLibs ./network;
 
       # flakes
-      flakes = import ./flakes.nix { lib = self; };
+      flakes = callLibs ./flakes.nix;
 
       inherit (builtins)
         getContext

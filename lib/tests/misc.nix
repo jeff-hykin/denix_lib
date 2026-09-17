@@ -68,6 +68,7 @@ let
     hasInfix
     id
     ifilter0
+    isFunction
     isStorePath
     join
     lazyDerivation
@@ -154,6 +155,8 @@ let
     builder = "builder";
     system = "system";
   };
+
+  aPathLiteral = ./misc.nix;
 in
 
 runTests {
@@ -925,6 +928,63 @@ runTests {
     expected = "1.2.3";
   };
 
+  testIsFunctionStr = {
+    expr = isFunction "a";
+    expected = false;
+  };
+  testIsFunctionInt = {
+    expr = isFunction 0;
+    expected = false;
+  };
+  testIsFunctionFloat = {
+    expr = isFunction 0.4;
+    expected = false;
+  };
+  testIsFunctionPath = {
+    expr = isFunction ./.;
+    expected = false;
+  };
+  testIsFunctionList = {
+    expr = isFunction [ ];
+    expected = false;
+  };
+  testIsFunctionAttrs = {
+    expr = isFunction { };
+    expected = false;
+  };
+  testIsFunctionBool = {
+    expr = isFunction false;
+    expected = false;
+  };
+  testIsFunctionDerivation = {
+    expr = isFunction (builtins.derivation { });
+    expected = false;
+  };
+  testIsFunctionNull = {
+    expr = isFunction null;
+    expected = false;
+  };
+  testIsFunctionFunction = {
+    expr = isFunction isFunction;
+    expected = true;
+  };
+  testIsFunctionAttrsWithValidFunctor = {
+    expr = isFunction { __functor = _: _: null; };
+    expected = true;
+  };
+  testIsFunctionDrvWithValidFunctor = {
+    expr = isFunction ((builtins.derivation { }) // { __functor = _: _: null; });
+    expected = true;
+  };
+  testIsFunctionAttrsWithFunctorArity1 = {
+    expr = isFunction { __functor = _: null; };
+    expected = false;
+  };
+  testIsFunctionAttrsWithNonFunctionFunctor = {
+    expr = isFunction { __functor = null; };
+    expected = false;
+  };
+
   testIsStorePath = {
     expr =
       let
@@ -988,7 +1048,7 @@ runTests {
           outPath = "/drv";
           foo = "ignored attribute";
         };
-        path = /path;
+        path = aPathLiteral;
         stringable = {
           __toString = _: "hello toString";
           bar = "ignored attribute";
@@ -1002,7 +1062,7 @@ runTests {
       possibly newlines
       ')
       drv=/drv
-      path=/path
+      path=${aPathLiteral}
       stringable='hello toString'
     '';
   };
